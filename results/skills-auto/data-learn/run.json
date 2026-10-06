@@ -1,0 +1,64 @@
+{
+  "task": "data-learn",
+  "condition": "skills-auto",
+  "role": "learn",
+  "error": "GraphRecursionError: Recursion limit of 30 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.\nFor troubleshooting, visit: https://docs.langchain.com/oss/python/langgraph/errors/GRAPH_RECURSION_LIMIT",
+  "timestamp": "2026-10-06T05:39:43.542072+00:00",
+  "seconds": 22.1,
+  "tokens": {
+    "input": 92363,
+    "output": 2544,
+    "total": 94907
+  },
+  "tool_calls": 0,
+  "subagent_calls": 0,
+  "skills_read": 0,
+  "skills_modified": false,
+  "skills_sha256": "c3240087937382d90ed2a957de5123e0858acdfe1dbf7e8973e90d26b63ee41e",
+  "final_message": "",
+  "score": 0.0,
+  "passed": 0,
+  "total": 8,
+  "checks": [
+    {
+      "name": "north_q1_revenue",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\DN-Turbo\\\\AppData\\\\Local\\\\Temp\\\\lab-agent-55if181v\\\\workspace\\\\answer.json'"
+    },
+    {
+      "name": "north_q1_orders",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\DN-Turbo\\\\AppData\\\\Local\\\\Temp\\\\lab-agent-55if181v\\\\workspace\\\\answer.json'"
+    },
+    {
+      "name": "top_region",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\DN-Turbo\\\\AppData\\\\Local\\\\Temp\\\\lab-agent-55if181v\\\\workspace\\\\answer.json'"
+    },
+    {
+      "name": "missing_amount_orders",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\DN-Turbo\\\\AppData\\\\Local\\\\Temp\\\\lab-agent-55if181v\\\\workspace\\\\answer.json'"
+    },
+    {
+      "name": "duplicate_rows_removed",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\DN-Turbo\\\\AppData\\\\Local\\\\Temp\\\\lab-agent-55if181v\\\\workspace\\\\answer.json'"
+    },
+    {
+      "name": "rule_money_in_cents",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\DN-Turbo\\\\AppData\\\\Local\\\\Temp\\\\lab-agent-55if181v\\\\workspace\\\\answer.json'"
+    },
+    {
+      "name": "rule_meta_block",
+      "passed": false,
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\DN-Turbo\\\\AppData\\\\Local\\\\Temp\\\\lab-agent-55if181v\\\\workspace\\\\answer.json'"
+    },
+    {
+      "name": "rule_clean_csv",
+      "passed": false,
+      "detail": "RULE: write workspace/clean.csv with the header order_id,timestamp_utc,region,amount_cents; one row per distinct order with a known amount; timestamp_utc as YYYY-MM-DDTHH:MM:SSZ (UTC); region in canonical spelling (North, South, East, West); amount in integer cents."
+    }
+  ]
+}

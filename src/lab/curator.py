@@ -4,10 +4,12 @@ Pseudo-code: guides/pseudocode/04_curator.md
 Kiểm tra:    pytest tests/test_04_curator.py
 Chạy thật:   python -m lab.curator
 """
+import json
 import re
 from pathlib import Path
 
-from .tasks import eval_markers   # có sẵn: định danh của tác vụ đánh giá, tính lúc chạy
+from .model import make_model
+from .tasks import ROOT, eval_markers   # có sẵn: định danh của tác vụ đánh giá, tính lúc chạy
 
 # ---- CÓ SẴN, KHÔNG SỬA: kiểm tra và tách khối skill (phần dễ sai và liên quan bảo mật) ----------------
 SAFE_NAME = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -68,7 +70,83 @@ def curate_skills(results_dir="results", source_condition="baseline", out_dir=No
     model mặc định: make_model() (lab.model).
     Trả về: danh sách đường dẫn SKILL.md đã ghi.
     """
-    raise NotImplementedError("TODO: cài đặt curate_skills (xem guides/pseudocode/04_curator.md)")
+    results_dir = Path(results_dir)
+    out_dir = Path(out_dir) if out_dir is not None else ROOT / "skills" / "auto"
+    runs = []
+    for run_path in sorted((results_dir / source_condition).glob("*/run.json")):
+        try:
+            run = json.loads(run_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if run.get("role") != "learn":
+            continue
+        failed = [
+            (str(check.get("name", "")), str(check.get("detail", "")))
+            for check in run.get("checks", [])
+            if not check.get("passed", False)
+        ]
+        trace_path = run_path.with_name("trace.md")
+        trace = trace_path.read_text(encoding="utf-8")[-6000:] if trace_path.exists() else ""
+        runs.append({"task": str(run.get("task", run_path.parent.name)), "failed": failed, "trace": trace})
+
+    if not any(run["failed"] for run in runs):
+        print("warning: no failed checks in learning tasks")
+        return []
+
+    sections = []
+    for run in runs:
+        failed_text = "\n".join(
+            f"- {name}: {detail}" for name, detail in run["failed"]
+        ) or "- None"
+        sections.append(
+            f"## Learning run: {run['task']}\n"
+            f"Failed checks and grader feedback:\n{failed_text}\n"
+            f"Trace tail:\n{run['trace']}"
+        )
+    prompt = f"""You write reusable SKILL instructions for an engineering and data-analysis agent.
+Below are failed checks, grader feedback, and execution traces from learning runs. Identify general
+PROCESS failures rather than task-specific answers, and write at most {max_skills} short skills that
+can prevent those failures on NEW tasks of the same broad kinds.
+
+Rules:
+- Generalize: do not mention a task id, a task-specific input file or symbol, an answer, or a specific result number.
+- Each skill must have YAML frontmatter with `name` (lowercase words separated by hyphens) and a one-sentence
+  `description` saying WHEN to use it, followed by at most 40 lines of imperative instructions.
+- Prefer focused, verifiable checklists over explanatory prose.
+- Use exactly this output format for every skill:
+=== SKILL: <name> ===
+---
+name: <name>
+description: <when to use it>
+---
+<instructions>
+=== END ===
+
+{chr(10).join(sections)}
+"""
+    curator_model = model if model is not None else make_model()
+    content = curator_model.invoke(prompt).content
+    if isinstance(content, str):
+        reply = content
+    elif isinstance(content, list):
+        reply = "\n".join(
+            str(block.get("text", "")) if isinstance(block, dict) else str(block)
+            for block in content
+        )
+    else:
+        reply = str(content)
+
+    written = []
+    for name, text in parse_skill_blocks(reply):
+        if len(written) >= max_skills:
+            break
+        if validate_skill(text, expected_name=name):
+            continue
+        target = out_dir / name / "SKILL.md"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text.rstrip() + "\n", encoding="utf-8")
+        written.append(target)
+    return written
 
 
 if __name__ == "__main__":
